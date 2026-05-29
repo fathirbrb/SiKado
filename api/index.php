@@ -4,9 +4,9 @@ define("DB_FILE", TMP . "/dgsign_db.json");
 
 require_once __DIR__ . "/../vendor/autoload.php";
 use RobThree\Auth\TwoFactorAuth;
-use RobThree\Auth\Providers\Qr\QrServerProvider;
+use RobThree\Auth\Providers\Qr\QRServerProvider;
 
-$tfa = new TwoFactorAuth(new QrServerProvider());
+$tfa = new TwoFactorAuth(new QRServerProvider());
 $message = "";
 $message_type = "";
 $qr_image_base64 = "";
