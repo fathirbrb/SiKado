@@ -1,0 +1,591 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family:
+        "Segoe UI",
+        system-ui,
+        -apple-system,
+        sans-serif;
+    background: #f0f2ff;
+    min-height: 100vh;
+    padding: 32px 16px;
+    color: #1e1e2e;
+    line-height: 1.6;
+}
+
+/* ── Container ── */
+.container {
+    max-width: 780px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e4e7f0;
+    box-shadow: 0 4px 24px rgba(79, 70, 229, 0.07);
+    overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+    padding: 40px 48px 36px;
+    border-bottom: 1px solid #f0f2ff;
+}
+
+.header h1 {
+    font-size: 1.75em;
+    font-weight: 700;
+    color: #1e1e2e;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+}
+
+.header p {
+    font-size: 0.95em;
+    color: #6b7280;
+}
+
+/* ── Content ── */
+.content {
+    padding: 36px 48px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Tombol Guide ── */
+.btn-guide {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #f0f2ff;
+    color: #4f46e5;
+    border: 1px solid #ddd9fb;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+    align-self: flex-start;
+}
+
+.btn-guide:hover {
+    background: #e5e2fd;
+    border-color: #c5bffa;
+}
+
+/* ── Modal ── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 15, 30, 0.45);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid #f0f2ff;
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e1e2e;
+}
+
+.modal-sub {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+.modal-close {
+    background: #f3f4f6;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 18px;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition:
+        background 0.15s,
+        color 0.15s;
+    line-height: 1;
+    padding-bottom: 1px;
+}
+
+.modal-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 20px 24px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Prasyarat */
+.guide-prereq {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #f0f2ff;
+    border: 1px solid #ddd9fb;
+    border-radius: 10px;
+    padding: 18px 20px;
+}
+
+.guide-prereq-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.guide-prereq-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e1e2e;
+}
+
+.guide-prereq-desc {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.guide-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.guide-badge img {
+    display: block;
+    height: 34px;
+    border-radius: 4px;
+}
+
+.guide-prereq-img {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 14px;
+}
+
+/* Section label */
+.guide-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9ca3af;
+}
+
+/* Flow */
+.guide-flow {
+    display: flex;
+    flex-direction: column;
+}
+
+.guide-step {
+    display: flex;
+    gap: 14px;
+}
+
+.guide-step-num {
+    background: #4f46e5;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.guide-step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 4px;
+    flex: 1;
+}
+
+.guide-step-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e1e2e;
+}
+
+.guide-step-desc {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.65;
+}
+
+.guide-tip {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f9fafb;
+    border-left: 3px solid #e4e7f0;
+    padding: 6px 10px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+.guide-connector {
+    width: 1px;
+    height: 20px;
+    background: #e4e7f0;
+    margin-left: 12px;
+    margin: 6px 0 6px 12px;
+}
+
+.guide-step-title code,
+.guide-step-desc code,
+.guide-tip code {
+    background: #f0f2ff;
+    color: #4f46e5;
+    font-size: 11.5px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.guide-note {
+    font-size: 12.5px;
+    color: #9ca3af;
+    padding-top: 12px;
+    border-top: 1px solid #f0f2ff;
+    line-height: 1.6;
+}
+
+/* ── Stepper ── */
+.stepper {
+    display: flex;
+    align-items: center;
+    padding: 4px 0 8px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f0f2ff;
+    color: #a0a8c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95em;
+    border: 2px solid #e4e7f0;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        border-color 0.2s;
+}
+
+.step.done .step-circle {
+    background: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+}
+
+.step.active .step-circle {
+    background: white;
+    color: #4f46e5;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a0a8c0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.step.done .step-label,
+.step.active .step-label {
+    color: #4f46e5;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #e4e7f0;
+    margin: 0 8px 22px;
+    border-radius: 2px;
+    transition: background 0.2s;
+}
+
+.step-line.done {
+    background: #4f46e5;
+}
+
+/* ── Message ── */
+.message {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    border-left: 4px solid;
+}
+
+.message.success {
+    background: #f0fdf4;
+    border-color: #22c55e;
+    color: #15803d;
+}
+
+.message.error {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #b91c1c;
+}
+
+.message.warning {
+    background: #fffbeb;
+    border-color: #f59e0b;
+    color: #b45309;
+}
+
+.message.info {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1d4ed8;
+}
+
+/* ── Step Card ── */
+.step-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e4e7f0;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.step-card:hover {
+    border-color: #c7c5f4;
+    box-shadow: 0 2px 12px rgba(79, 70, 229, 0.08);
+}
+
+.step-card h3 {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #1e1e2e;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.step-number {
+    background: #eeecfd;
+    color: #4f46e5;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.helper-text {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 16px;
+}
+
+/* ── Form ── */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 10px 14px;
+    border: 1.5px solid #e4e7f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e1e2e;
+    background: white;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover {
+    border-color: #c7c5f4;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input::placeholder {
+    color: #b0b7c3;
+}
+
+/* ── Button ── */
+button[type="submit"] {
+    background: #4f46e5;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+    align-self: flex-start;
+}
+
+button[type="submit"]:hover {
+    background: #4338ca;
+}
+
+button[type="submit"]:active {
+    background: #3730a3;
+}
+
+/* ── QR Container ── */
+.qr-container {
+    margin-top: 16px;
+    padding: 20px;
+    background: #f9fafb;
+    border: 1px solid #e4e7f0;
+    border-radius: 10px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.qr-container p {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.qr-container img {
+    border-radius: 6px;
+}
+
+.qr-container span {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    body {
+        padding: 16px 12px;
+    }
+
+    .header {
+        padding: 28px 24px 24px;
+    }
+
+    .content {
+        padding: 24px 24px 32px;
+    }
+
+    .header h1 {
+        font-size: 1.4em;
+    }
+
+    .step-label {
+        display: none;
+    }
+
+    .step-line {
+        margin-bottom: 0;
+    }
+
+    button[type="submit"] {
+        align-self: stretch;
+        text-align: center;
+    }
+}

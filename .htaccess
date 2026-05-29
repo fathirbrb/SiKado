@@ -1,0 +1,16 @@
+# Proteksi file-file sensitif
+<FilesMatch "\.(p12|sig|txt)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Izinkan akses hanya ke index.php
+<Files "index.php">
+    Allow from all
+</Files>
+
+# Blokir akses ke vendor folder dari browser
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^vendor/.*$ - [F,L]
+</IfModule>
