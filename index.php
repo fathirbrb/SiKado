@@ -1,5 +1,6 @@
 <?php
-session_start();
+define("TMP", rtrim(sys_get_temp_dir(), "/"));
+define("DB_FILE", TMP . "/dgsign_db.json");
 
 require_once "vendor/autoload.php";
 use RobThree\Auth\TwoFactorAuth;
@@ -10,13 +11,31 @@ $message = "";
 $message_type = "";
 $qr_image_base64 = "";
 
-if (!isset($_SESSION["user_db"])) {
-    $_SESSION["user_db"] = [];
+// ── JSON DB ──────────────────────────────────────
+function db_all(): array
+{
+    if (!file_exists(DB_FILE)) {
+        return [];
+    }
+    return json_decode(file_get_contents(DB_FILE), true) ?? [];
 }
 
-function valid_nim($nim)
+function db_get(string $nim): ?array
 {
-    return preg_match('/^[a-zA-Z0-9_-]{3,20}$/', $nim);
+    return db_all()[$nim] ?? null;
+}
+
+function db_save(string $nim, array $data): void
+{
+    $db = db_all();
+    $db[$nim] = $data;
+    file_put_contents(DB_FILE, json_encode($db, JSON_PRETTY_PRINT));
+}
+// ─────────────────────────────────────────────────
+
+function valid_nim(string $nim): bool
+{
+    return (bool) preg_match('/^[a-zA-Z0-9_-]{3,20}$/', $nim);
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -24,18 +43,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($action === "setup_otp") {
         $username = trim($_POST["username"]);
-
         if (!valid_nim($username)) {
             $message =
-                "NPM hanya boleh huruf, angka, underscore, atau dash (3–20 karakter).";
+                "NIM hanya boleh huruf, angka, underscore, atau dash (3–20 karakter).";
             $message_type = "error";
         } else {
             $secret = $tfa->createSecret();
-            $_SESSION["user_db"][$username] = [
+            db_save($username, [
                 "otp_secret" => $secret,
                 "has_digital_id" => false,
                 "has_signed" => false,
-            ];
+            ]);
             $qr_image_base64 = $tfa->getQRCodeImageAsDataUri(
                 "STEI-ITB ($username)",
                 $secret,
@@ -50,9 +68,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $username = trim($_POST["username"]);
         $otp = trim($_POST["otp"]);
         $password_p12 = $_POST["password"];
+        $user = db_get($username);
 
         if (!valid_nim($username)) {
-            $message = "NPM tidak valid.";
+            $message = "NIM tidak valid.";
             $message_type = "error";
         } elseif (strlen($otp) !== 6 || !ctype_digit($otp)) {
             $message = "OTP harus 6 digit angka.";
@@ -60,15 +79,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } elseif (strlen($password_p12) < 6) {
             $message = "Password minimal 6 karakter.";
             $message_type = "error";
-        } elseif (!isset($_SESSION["user_db"][$username])) {
-            $message = "NPM '$username' belum terdaftar. Selesaikan Langkah 1 terlebih dahulu.";
+        } elseif (!$user) {
+            $message = "NIM '$username' belum terdaftar. Selesaikan Langkah 1 terlebih dahulu.";
             $message_type = "error";
-        } elseif ($_SESSION["user_db"][$username]["has_digital_id"]) {
-            $message = "NPM '$username' sudah memiliki sertifikat digital.";
+        } elseif ($user["has_digital_id"]) {
+            $message = "NIM '$username' sudah memiliki sertifikat digital.";
             $message_type = "warning";
         } else {
-            $secret = $_SESSION["user_db"][$username]["otp_secret"];
-            if (!$tfa->verifyCode($secret, $otp)) {
+            if (!$tfa->verifyCode($user["otp_secret"], $otp)) {
                 $message = "Kode OTP salah atau kedaluwarsa.";
                 $message_type = "error";
             } else {
@@ -79,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $key = openssl_pkey_new($config);
                 $dn = [
                     "commonName" => $username,
-                    "organizationName" => "Mahasiswa",
+                    "organizationName" => "Mahasiswa STEI ITB",
                     "countryName" => "ID",
                 ];
                 $csr = openssl_csr_new($dn, $key);
@@ -89,13 +107,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 if (
                     openssl_pkcs12_export_to_file(
                         $cert,
-                        "./$filename",
+                        TMP . "/$filename",
                         $key,
                         $password_p12,
                     )
                 ) {
-                    $_SESSION["user_db"][$username]["has_digital_id"] = true;
-                    $_SESSION["user_db"][$username]["p12_file"] = $filename;
+                    $user["has_digital_id"] = true;
+                    $user["p12_file"] = $filename;
+                    db_save($username, $user);
                     $message = "Sertifikat digital <b>$filename</b> berhasil dibuat.";
                     $message_type = "success";
                 } else {
@@ -110,18 +129,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($action === "sign_data") {
         $username = trim($_POST["username"]);
         $password = $_POST["password"];
+        $user = db_get($username);
 
         if (!valid_nim($username)) {
-            $message = "NPM tidak valid.";
+            $message = "NIM tidak valid.";
             $message_type = "error";
-        } elseif (!isset($_SESSION["user_db"][$username])) {
-            $message = "NPM '$username' belum terdaftar. Selesaikan Langkah 1 terlebih dahulu.";
+        } elseif (!$user) {
+            $message = "NIM '$username' belum terdaftar. Selesaikan Langkah 1 terlebih dahulu.";
             $message_type = "error";
-        } elseif (!$_SESSION["user_db"][$username]["has_digital_id"]) {
-            $message = "NPM '$username' belum memiliki sertifikat. Selesaikan Langkah 2 terlebih dahulu.";
+        } elseif (!$user["has_digital_id"]) {
+            $message = "NIM '$username' belum memiliki sertifikat. Selesaikan Langkah 2 terlebih dahulu.";
             $message_type = "error";
         } else {
-            $p12_file = "./" . $username . "_identity.p12";
+            $p12_file = TMP . "/" . $username . "_identity.p12";
             if (!file_exists($p12_file)) {
                 $message = "File .p12 tidak ditemukan. Mungkin sudah terhapus.";
                 $message_type = "error";
@@ -141,9 +161,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $certs["pkey"],
                         OPENSSL_ALGO_SHA256,
                     );
-                    file_put_contents("./tanda_tangan.sig", $signature);
-                    file_put_contents("./dokumen_mentah.txt", $data);
-                    $_SESSION["user_db"][$username]["has_signed"] = true;
+                    file_put_contents(TMP . "/tanda_tangan.sig", $signature);
+                    file_put_contents(TMP . "/dokumen_mentah.txt", $data);
+                    $user["has_signed"] = true;
+                    db_save($username, $user);
                     $message =
                         "Dokumen berhasil ditandatangani. Signature disimpan di <b>tanda_tangan.sig</b>.";
                     $message_type = "success";
@@ -157,24 +178,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($action === "verify_data") {
         $username = trim($_POST["username"]);
+        $user = db_get($username);
 
         if (!valid_nim($username)) {
-            $message = "NPM tidak valid.";
+            $message = "NIM tidak valid.";
             $message_type = "error";
-        } elseif (!isset($_SESSION["user_db"][$username])) {
-            $message = "NPM '$username' belum terdaftar. Selesaikan Langkah 1 terlebih dahulu.";
+        } elseif (!$user) {
+            $message = "NIM '$username' belum terdaftar. Selesaikan Langkah 1 terlebih dahulu.";
             $message_type = "error";
-        } elseif (!$_SESSION["user_db"][$username]["has_digital_id"]) {
-            $message = "NPM '$username' belum memiliki sertifikat. Selesaikan Langkah 2 terlebih dahulu.";
+        } elseif (!$user["has_digital_id"]) {
+            $message = "NIM '$username' belum memiliki sertifikat. Selesaikan Langkah 2 terlebih dahulu.";
             $message_type = "error";
-        } elseif (
-            !isset($_SESSION["user_db"][$username]["has_signed"]) ||
-            !$_SESSION["user_db"][$username]["has_signed"]
-        ) {
-            $message = "NPM '$username' belum menandatangani dokumen. Selesaikan Langkah 3 terlebih dahulu.";
+        } elseif (!$user["has_signed"]) {
+            $message = "NIM '$username' belum menandatangani dokumen. Selesaikan Langkah 3 terlebih dahulu.";
             $message_type = "error";
         } else {
-            $p12_file = "./" . $username . "_identity.p12";
+            $p12_file = TMP . "/" . $username . "_identity.p12";
             $certs = [];
             openssl_pkcs12_read(
                 file_get_contents($p12_file),
@@ -182,14 +201,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $_POST["password_cek"],
             );
             $result = openssl_verify(
-                file_get_contents("./dokumen_mentah.txt"),
-                file_get_contents("./tanda_tangan.sig"),
+                file_get_contents(TMP . "/dokumen_mentah.txt"),
+                file_get_contents(TMP . "/tanda_tangan.sig"),
                 $certs["cert"],
                 OPENSSL_ALGO_SHA256,
             );
-
             if ($result === 1) {
-                $message = "Dokumen 100% asli dan valid dari pemilik<b>$username</b>.";
+                $message = "Dokumen 100% asli dan valid dari pemilik NIM <b>$username</b>.";
                 $message_type = "success";
             } elseif ($result === 0) {
                 $message =
@@ -203,9 +221,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// Tentukan status step berdasarkan user yang submit
 $nim_check = isset($_POST["username"]) ? trim($_POST["username"]) : "";
-$user_data = $_SESSION["user_db"][$nim_check] ?? null;
+$user_data = db_get($nim_check);
 $step1_done = $user_data !== null;
 $step2_done = $step1_done && !empty($user_data["has_digital_id"]);
 $step3_done = $step2_done && !empty($user_data["has_signed"]);

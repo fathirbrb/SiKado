@@ -1,0 +1,11 @@
+# Composer
+vendor/
+
+# File sensitif yang dibuat runtime
+*.p12
+*.sig
+dokumen_mentah.txt
+
+# OS
+.DS_Store
+Thumbs.db
