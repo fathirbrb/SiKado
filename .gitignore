@@ -1,6 +1,3 @@
-# Composer
-vendor/
-
 # File sensitif yang dibuat runtime
 *.p12
 *.sig
