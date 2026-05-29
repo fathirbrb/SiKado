@@ -93,6 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $config = [
                     "private_key_bits" => 2048,
                     "private_key_type" => OPENSSL_KEYTYPE_RSA,
+                    "config" => __DIR__ . "/openssl.cnf",
                 ];
                 $key = openssl_pkey_new($config);
                 $dn = [
