@@ -6,21 +6,21 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit017c5201b421d99f90b020e446d1b958
 {
-    public static $prefixLengthsPsr4 = array(
+    public static $prefixLengthsPsr4 = array (
         'R' =>
-            array(
-                'RobThree\\Auth\\' => 14,
-            ),
+        array (
+            'RobThree\\Auth\\' => 14,
+        ),
     );
 
-    public static $prefixDirsPsr4 = array(
+    public static $prefixDirsPsr4 = array (
         'RobThree\\Auth\\' =>
-            array(
-                0 => __DIR__ . '/..' . '/robthree/twofactorauth/lib',
-            ),
+        array (
+            0 => __DIR__ . '/..' . '/robthree/twofactorauth/lib',
+        ),
     );
 
-    public static $classMap = array(
+    public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
